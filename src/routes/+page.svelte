@@ -147,7 +147,7 @@
 
 <html lang='en'>
   <head>
-    <title>Youforge</title>
+    <title>Glazer</title>
   </head>
   <body>
         <br>
