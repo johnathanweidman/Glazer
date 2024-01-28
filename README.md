@@ -14,7 +14,7 @@ This project has the folowing goals:
 ## Running on Windows with nodejs:
 
 - Install [nodejs](https://nodejs.org/en)
-- [Download](https://github.com/Davidster/hueforge-at-home/archive/refs/heads/main.zip) this project and unzip it
+- Download the zip file by going to the green code button and the clicking and selecting download zip 
 - Open a terminal window in the folder where you unzipped the project (the folder where `index.html` is located) by opening the folder in File Explorer and typing 'cmd' in the search bar like so:
 
 ![image](https://github.com/Davidster/ikari/assets/2389735/1a0d58aa-056d-413e-8577-f2431cd21b9b)
