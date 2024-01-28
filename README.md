@@ -19,7 +19,10 @@ This project has the folowing goals:
 
 ![image](https://github.com/Davidster/ikari/assets/2389735/1a0d58aa-056d-413e-8577-f2431cd21b9b)
 
-- Run the following command:
+- Run the following commands:
+```
+npm install
+```
 
 ```
 npm run dev
