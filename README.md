@@ -25,5 +25,5 @@ This project has the folowing goals:
 npm run dev
 ```
 
-- Open up the URL in your browser as listed. 
+- Open up the URL in your browser at the listed url. 
 
