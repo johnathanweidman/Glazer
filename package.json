@@ -38,6 +38,7 @@
 		"p5": "^1.9.0",
 		"p5-svelte": "^3.1.2",
 		"svelte-awesome-color-picker": "^3.0.4",
+		"svelte-heros-v2": "^1.2.0",
 		"three": "^0.160.1"
 	}
 }
