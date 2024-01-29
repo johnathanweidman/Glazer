@@ -111,7 +111,6 @@
                         copy.pixels[i + 2] = result[2]
                     }
                 }
-                console.log(current_color, layer)
                 copy.updatePixels()
                 p5.image(copy, 0, 0)	
                 p5.image(img, img.width + 20, 0)	
@@ -120,7 +119,6 @@
                 console.log("Took:" + (Date.now() - total)/1000.0 + "s")
                 final = copy.canvas;
                 mesh = imageToMesh(final)
-                // saveSTL(mesh);
                 p5.noLoop()
                 
             }
