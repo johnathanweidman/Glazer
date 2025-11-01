@@ -1,25 +1,38 @@
 <script>
-import ColorPicker from 'svelte-awesome-color-picker';
-import * as Icon from 'svelte-heros-v2';
+	import ColorPicker from 'svelte-awesome-color-picker';
+	import * as Icon from 'svelte-heros-v2';
 
-export let color = [null, null]
-export let remove = ()=>{};
-export let removable = true;
-export let min = '1'
-export let max = '25'
-
-
+	export let color = [null, null];
+	export let remove = () => {};
+	export let removable = true;
+	export let min = '1';
+    export let max = '25';
+    export let disabled = false;
+    export let label = '';
 </script>
 
-<div>
-    {#if removable} 
-        <button title="Remove" on:click={()=>remove(color)} ><Icon.Minus size="18" class="inline-flex" /></button>
-    {/if}
-    <ColorPicker bind:hex = {color[0]} nullable /><br>
-    <label>Translucency: </label><br>
-    <input type = 'number' bind:value = {color[1]}/><br>
-    <label>layer: </label><br>
-    <input type = 'number' min={min} max={max} value = {color[2]}/><br>
+<div class="card bg-base-100 shadow-xl">
+    <div class="card-body p-2">
+        <div class="form-control">
+            <label class="label-text text-xs flex justify-between items-center">
+                <span>Color</span>
+                {#if removable}
+                    <div class="card-actions">
+                        <button title="Remove" on:click={() => remove(color)} class="btn btn-square btn-xs">
+                            <Icon.Minus size="16" />
+                        </button>
+                    </div>
+                {/if}
+            </label>
+            <ColorPicker bind:hex={color[0]} nullable />
+        </div>
+        <div class="form-control">
+            <label class="label-text text-xs">Translucency</label>
+            <input type="number" placeholder="" bind:value={color[1]} class="input input-bordered input-sm" />
+        </div>
+        <div class="form-control">
+            <label class="label-text text-xs">Layer</label>
+            <input type="number" placeholder="" min={min} max={max} bind:value={color[2]} disabled={disabled} class="input input-bordered input-sm" />
+        </div>
+	</div>
 </div>
-
-
