@@ -16,56 +16,58 @@
 	export let redrawFn;
 	export let saveSTL;
 	export let remove;
-</script>
+	export let save;
+		export let load;
+		export let currentFileName;
+		</script>
+		
+		<div class="p-4 space-y-4">
+			<div class="form-control">
+				<label class="label">
+					<span class="label-text">Image File</span>
+				</label>
+				<input
+					on:change={handleInput}
+					accept="image/png, image/jpeg"
+					type="file"
+					class="file-input file-input-bordered w-full"
+				/>
+				{#if currentFileName}
+					<span class="label-text-alt">Loaded: {currentFileName}</span>
+				{/if}
+			</div>
+	<div class="divider">Colors</div>
 
-<div class="p-4 space-y-4">
 	<div class="form-control">
-		<label class="label">
-			<span class="label-text">Image File</span>
-		</label>
-		<input
-			on:change={handleInput}
-			accept="image/png, image/jpeg"
-			type="file"
-			class="file-input file-input-bordered w-full"
-		/>
+		<ColorPicker
+			label="Base Color"
+			min={0}
+			max={0}
+			removable={false}
+			bind:color={base_color}
+			disabled={true}
+		></ColorPicker>
 	</div>
 
-			<div class="divider">Colors</div>
-
-		
-
+	{#if !lithophaneMode}
+		{#each colors as color, i}
 			<div class="form-control">
-
-				<ColorPicker label="Base Color" min={0} max={0} removable={false} bind:color={base_color} disabled={true}></ColorPicker>
-
+				<ColorPicker
+					label={'Color ' + (i + 1)}
+					min={'1'}
+					max={layers.toString()}
+					{remove}
+					bind:color
+				></ColorPicker>
 			</div>
+		{/each}
 
-		
+		<button title="Add" on:click={addColor} class="btn btn-outline btn-primary btn-sm w-full">
+			<Icon.Plus size="18" class="inline-flex mr-2" />
 
-			{#if !lithophaneMode}
-
-				{#each colors as color, i}
-
-					<div class="form-control">
-
-						<ColorPicker label={'Color ' + (i + 1)} min={'1'} max={layers.toString()} {remove} bind:color={color}></ColorPicker>
-
-					</div>
-
-				{/each}
-
-		
-
-				<button title="Add" on:click={addColor} class="btn btn-outline btn-primary btn-sm w-full">
-
-					<Icon.Plus size="18" class="inline-flex mr-2" />
-
-					Add Color
-
-				</button>
-
-			{/if}
+			Add Color
+		</button>
+	{/if}
 
 	<div class="divider">Settings</div>
 
@@ -133,7 +135,8 @@
 	</div>
 
 	<div class="divider"></div>
-
+	<button on:click={save} class="btn btn-primary w-full">Save</button>
+	<button on:click={load} class="btn btn-secondary w-full">Load</button>
 	<button on:click={redrawFn} class="btn btn-primary w-full">Redraw</button>
 	<button on:click={() => saveSTL(mesh)} disabled={!mesh} class="btn btn-secondary w-full"
 		>Download STL</button

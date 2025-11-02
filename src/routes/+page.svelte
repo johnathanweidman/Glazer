@@ -8,6 +8,7 @@
 
 	let isLoading = false;
 	let currentFile = null;
+	let currentFileName = null;
 	let redrawFn = () => {};
 	let final = null;
 	let base_color = ['#000000', 1, 0];
@@ -44,6 +45,51 @@
 		colors = [...colors, []];
 	};
 
+	function saveState() {
+		const state = {
+			base_color,
+			colors,
+			use_gray,
+			lithoSettings,
+			layerHeight,
+			currentFile,
+			currentFileName
+		};
+		const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = 'glazer-state.json';
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	}
+
+	function loadState() {
+		const input = document.createElement('input');
+		input.type = 'file';
+		input.accept = '.json';
+		input.onchange = (e) => {
+			const file = e.target.files[0];
+			if (!file) return;
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				const state = JSON.parse(e.target.result);
+				base_color = state.base_color;
+				colors = state.colors;
+				use_gray = state.use_gray;
+				lithoSettings = state.lithoSettings;
+				layerHeight = state.layerHeight;
+				currentFile = state.currentFile;
+				currentFileName = state.currentFileName;
+				redrawFn(currentFile);
+			};
+			reader.readAsText(file);
+		};
+		input.click();
+	}
+
 	$: {
 		redrawFn(currentFile);
 		layers = Math.round(thickness / layerHeight);
@@ -59,10 +105,10 @@
 		reader.onloadend = () => {
 			if (!reader.result) return;
 			currentFile = reader.result;
+			currentFileName = file.name;
 		};
 		reader.readAsDataURL(file);
 	}
-
 
 	const sketch = (p5) => {
 		let current_value = null;
@@ -86,12 +132,13 @@
 				let d = p5.dist(r, g, b, targetColor[0], targetColor[1], targetColor[2]);
 
 				// If the color is within the tolerance, make it transparent
-									if (d < colorTolerance) {
-										imageToProcess.pixels[i] = 0;
-										imageToProcess.pixels[i + 1] = 0;
-										imageToProcess.pixels[i + 2] = 0;
-										imageToProcess.pixels[i + 3] = 255; // Set alpha to 255 (fully opaque)
-									}			}
+				if (d < colorTolerance) {
+					imageToProcess.pixels[i] = 0;
+					imageToProcess.pixels[i + 1] = 0;
+					imageToProcess.pixels[i + 2] = 0;
+					imageToProcess.pixels[i + 3] = 255; // Set alpha to 255 (fully opaque)
+				}
+			}
 			imageToProcess.updatePixels(); // Apply the changes to the image
 		}
 
@@ -148,17 +195,18 @@
 						current_value = p5.hue(c);
 					}
 					if (current_value >= thresh) {
-											if (lithoSettings.lithophaneMode) {
-												current_color = base_color;
-											} else {
-												current_color =
-													colors.find((color) => color[2] == layer) || current_color || base_color;
-											}
-											let result = mixbox.lerp(
-												orig_color.levels,
-												p5.color(current_color[0]).levels,
-												current_color[1]
-											);						copy.pixels[i + 0] = result[0];
+						if (lithoSettings.lithophaneMode) {
+							current_color = base_color;
+						} else {
+							current_color =
+								colors.find((color) => color[2] == layer) || current_color || base_color;
+						}
+						let result = mixbox.lerp(
+							orig_color.levels,
+							p5.color(current_color[0]).levels,
+							current_color[1]
+						);
+						copy.pixels[i + 0] = result[0];
 						copy.pixels[i + 1] = result[1];
 						copy.pixels[i + 2] = result[2];
 					}
@@ -206,7 +254,10 @@
 				{redrawFn}
 				{saveSTL}
 				{remove}
+				save={saveState}
+				load={loadState}
 				lithophaneMode={lithoSettings.lithophaneMode}
+				{currentFileName}
 			/>
 		</aside>
 
