@@ -9,6 +9,7 @@
 	let isLoading = false;
 	let currentFile = null;
 	let currentFileName = null;
+	let saveName = 'glazer-state';
 	let redrawFn = () => {};
 	let final = null;
 	let base_color = ['#000000', 1, 0];
@@ -59,8 +60,9 @@
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = 'glazer-state.json';
-		document.body.appendChild(a);
+    a.download = `${saveName}.json`;
+    console.log('Attempting to download file:', a.download);
+    document.body.appendChild(a); // Appending to body
 		a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
@@ -73,6 +75,7 @@
 		input.onchange = (e) => {
 			const file = e.target.files[0];
 			if (!file) return;
+
 			const reader = new FileReader();
 			reader.onload = (e) => {
 				const state = JSON.parse(e.target.result);
@@ -83,6 +86,7 @@
 				layerHeight = state.layerHeight;
 				currentFile = state.currentFile;
 				currentFileName = state.currentFileName;
+				saveName = file.name.replace(/\.json$/, '');
 				redrawFn(currentFile);
 			};
 			reader.readAsText(file);
@@ -258,6 +262,7 @@
 				load={loadState}
 				lithophaneMode={lithoSettings.lithophaneMode}
 				{currentFileName}
+				bind:saveName
 			/>
 		</aside>
 

@@ -17,25 +17,35 @@
 	export let saveSTL;
 	export let remove;
 	export let save;
-		export let load;
-		export let currentFileName;
-		</script>
-		
-		<div class="p-4 space-y-4">
-			<div class="form-control">
-				<label class="label">
-					<span class="label-text">Image File</span>
-				</label>
-				<input
-					on:change={handleInput}
-					accept="image/png, image/jpeg"
-					type="file"
-					class="file-input file-input-bordered w-full"
-				/>
-				{#if currentFileName}
-					<span class="label-text-alt">Loaded: {currentFileName}</span>
-				{/if}
-			</div>
+	export let load;
+	export let currentFileName;
+	export let saveName;
+</script>
+
+<div class="p-4 space-y-4">
+	<div class="form-control">
+		<label class="label">
+			<span class="label-text">Image File</span>
+		</label>
+		<input
+			on:change={handleInput}
+			accept="image/png, image/jpeg"
+			type="file"
+			class="file-input file-input-bordered w-full"
+		/>
+		{#if currentFileName}
+			<span class="label-text-alt">Loaded: {currentFileName}</span>
+		{/if}
+	</div>
+
+	<div class="divider">File</div>
+
+	<div class="form-control">
+		<label class="label">
+			<span class="label-text">Project Name</span>
+		</label>
+		<input bind:value={saveName} type="text" class="input input-bordered w-full" />
+	</div>
 	<div class="divider">Colors</div>
 
 	<div class="form-control">
