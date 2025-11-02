@@ -9,6 +9,7 @@
 	export let layerHeight;
 	export let layers;
 	export let mesh;
+	export let lithophaneMode = false;
 
 	export let handleInput;
 	export let addColor;
@@ -30,22 +31,41 @@
 		/>
 	</div>
 
-	<div class="divider">Colors</div>
+			<div class="divider">Colors</div>
 
-    <div class="form-control">
-        <ColorPicker label="Base Color" min={0} max={0} removable={false} bind:color={base_color} disabled={true}></ColorPicker>
-    </div>
+		
 
-    {#each colors as color, i}
-        <div class="form-control">
-            <ColorPicker label={'Color ' + (i+1)} min={'1'} max={layers.toString()} {remove} bind:color={color}></ColorPicker>
-        </div>
-    {/each}
+			<div class="form-control">
 
-	<button title="Add" on:click={addColor} class="btn btn-outline btn-primary btn-sm w-full">
-		<Icon.Plus size="18" class="inline-flex mr-2" />
-		Add Color
-	</button>
+				<ColorPicker label="Base Color" min={0} max={0} removable={false} bind:color={base_color} disabled={true}></ColorPicker>
+
+			</div>
+
+		
+
+			{#if !lithophaneMode}
+
+				{#each colors as color, i}
+
+					<div class="form-control">
+
+						<ColorPicker label={'Color ' + (i + 1)} min={'1'} max={layers.toString()} {remove} bind:color={color}></ColorPicker>
+
+					</div>
+
+				{/each}
+
+		
+
+				<button title="Add" on:click={addColor} class="btn btn-outline btn-primary btn-sm w-full">
+
+					<Icon.Plus size="18" class="inline-flex mr-2" />
+
+					Add Color
+
+				</button>
+
+			{/if}
 
 	<div class="divider">Settings</div>
 

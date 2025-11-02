@@ -63,6 +63,7 @@
 		reader.readAsDataURL(file);
 	}
 
+
 	const sketch = (p5) => {
 		let current_value = null;
 		let orig_color = p5.color(base_color[0]);
@@ -73,6 +74,27 @@
 			current_color = base_color;
 		};
 
+		function removeImageBackground(imageToProcess, targetColor, colorTolerance) {
+			imageToProcess.loadPixels(); // Load the pixel data of the image
+
+			for (let i = 0; i < imageToProcess.pixels.length; i += 4) {
+				let r = imageToProcess.pixels[i]; // Red component
+				let g = imageToProcess.pixels[i + 1]; // Green component
+				let b = imageToProcess.pixels[i + 2]; // Blue component
+
+				// Calculate the distance between the current pixel color and the target color
+				let d = p5.dist(r, g, b, targetColor[0], targetColor[1], targetColor[2]);
+
+				// If the color is within the tolerance, make it transparent
+									if (d < colorTolerance) {
+										imageToProcess.pixels[i] = 0;
+										imageToProcess.pixels[i + 1] = 0;
+										imageToProcess.pixels[i + 2] = 0;
+										imageToProcess.pixels[i + 3] = 255; // Set alpha to 255 (fully opaque)
+									}			}
+			imageToProcess.updatePixels(); // Apply the changes to the image
+		}
+
 		p5.preload = () => {
 			img = p5.loadImage(currentFile);
 			copy = p5.loadImage(currentFile);
@@ -82,6 +104,16 @@
 			if (img && copy) {
 				img.resize(final_w, 0);
 				copy.resize(final_w, 0);
+				if (lithoSettings.lithophaneMode) {
+					img.loadPixels();
+					const backgroundColor = [img.pixels[0], img.pixels[1], img.pixels[2]];
+
+					removeImageBackground(img, backgroundColor, 30);
+					removeImageBackground(copy, backgroundColor, 30);
+
+					img.filter(p5.INVERT);
+					copy.filter(p5.INVERT);
+				}
 				img.loadPixels();
 				copy.loadPixels();
 			}
@@ -116,14 +148,17 @@
 						current_value = p5.hue(c);
 					}
 					if (current_value >= thresh) {
-						current_color =
-							colors.find((color) => color[2] == layer) || current_color || base_color;
-						let result = mixbox.lerp(
-							orig_color.levels,
-							p5.color(current_color[0]).levels,
-							current_color[1]
-						);
-						copy.pixels[i + 0] = result[0];
+											if (lithoSettings.lithophaneMode) {
+												current_color = base_color;
+											} else {
+												current_color =
+													colors.find((color) => color[2] == layer) || current_color || base_color;
+											}
+											let result = mixbox.lerp(
+												orig_color.levels,
+												p5.color(current_color[0]).levels,
+												current_color[1]
+											);						copy.pixels[i + 0] = result[0];
 						copy.pixels[i + 1] = result[1];
 						copy.pixels[i + 2] = result[2];
 					}
@@ -171,6 +206,7 @@
 				{redrawFn}
 				{saveSTL}
 				{remove}
+				lithophaneMode={lithoSettings.lithophaneMode}
 			/>
 		</aside>
 
@@ -187,7 +223,7 @@
 							<span class="loading loading-spinner loading-lg"></span>
 						</div>
 					{/if}
-					<Viewer {mesh} />
+					<Viewer {mesh} lithophaneMode={lithoSettings.lithophaneMode} />
 				</div>
 			{:else}
 				<div class="flex h-full justify-center items-center">

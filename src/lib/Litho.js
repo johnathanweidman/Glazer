@@ -130,10 +130,6 @@ function imageToMesh(input, settings) {
 		for (var i = 0; i < width; i++) {
 			var gray = (canvasPixels[p] + canvasPixels[p + 1] + canvasPixels[p + 2]) / 767;
 
-			if (invert) {
-				gray = 1 - gray;
-			}
-
 			imageGrayValues[pDest++] = gray;
 
 			p += 4;

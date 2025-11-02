@@ -8,6 +8,7 @@
 	 * This prop is reactive, and when it changes, the viewer updates to show the new mesh.
 	 */
 	export let mesh = null;
+	export let lithophaneMode = false;
 
 	/**
 	 * Resets the camera view to intelligently frame the currently loaded mesh.
@@ -65,7 +66,11 @@
 	 */ onMount(() => {
 		// 1. Scene Setup
 		scene = new THREE.Scene();
-		scene.background = new THREE.Color(0xeeeeee); // Light gray background
+		if (lithophaneMode) {
+			scene.background = new THREE.Color(0x000000); // Black background
+		} else {
+			scene.background = new THREE.Color(0xeeeeee); // Light gray background
+		}
 
 		// 2. Camera Setup
 		camera = new THREE.PerspectiveCamera(
