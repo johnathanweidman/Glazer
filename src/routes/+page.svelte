@@ -60,9 +60,9 @@
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-    a.download = `${saveName}.json`;
-    console.log('Attempting to download file:', a.download);
-    document.body.appendChild(a); // Appending to body
+		a.download = `${saveName}.json`;
+		console.log('Attempting to download file:', a.download);
+		document.body.appendChild(a); // Appending to body
 		a.click();
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
@@ -208,7 +208,7 @@
 						let result = mixbox.lerp(
 							orig_color.levels,
 							p5.color(current_color[0]).levels,
-							current_color[1]
+							1 - current_color[1] / 100
 						);
 						copy.pixels[i + 0] = result[0];
 						copy.pixels[i + 1] = result[1];
@@ -268,7 +268,7 @@
 
 		<main class="flex-1 h-full">
 			{#if currentFile}
-				<div style="display: none;">
+				<div>
 					<P5 {sketch} />
 				</div>
 				<div class="w-full h-full relative">

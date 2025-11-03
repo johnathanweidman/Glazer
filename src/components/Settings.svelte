@@ -55,7 +55,7 @@
 			max={0}
 			removable={false}
 			bind:color={base_color}
-			disabled={true}
+			{layerHeight}
 		></ColorPicker>
 	</div>
 
@@ -68,6 +68,7 @@
 					max={layers.toString()}
 					{remove}
 					bind:color
+					{layerHeight}
 				></ColorPicker>
 			</div>
 		{/each}
