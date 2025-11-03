@@ -268,7 +268,7 @@
 
 		<main class="flex-1 h-full">
 			{#if currentFile}
-				<div>
+				<div class="hidden">
 					<P5 {sketch} />
 				</div>
 				<div class="w-full h-full relative">
