@@ -112,7 +112,6 @@ function imageToMesh(input, settings) {
 	}
 
 	var canvasCtx2d = canvas.getContext('2d');
-	console.log(canvasCtx2d);
 
 	canvasCtx2d.drawImage(image, 0, 0);
 

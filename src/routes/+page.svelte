@@ -5,6 +5,8 @@
 	import * as THREE from '../lib/three/three.module.js';
 	import Viewer from '../components/Viewer.svelte';
 	import Settings from '../components/Settings.svelte';
+	import image_processor_vert from '../lib/shaders/image_processor.vert?raw';
+	import image_processor_frag from '../lib/shaders/image_processor.frag?raw';
 
 	let isLoading = false;
 	let currentFile = null;
@@ -17,7 +19,6 @@
 	let layerHeight = 0.08;
 	let use_gray = true;
 	let img = null;
-	let copy = null;
 	let range = use_gray ? 255 : 360;
 	let final_w = 600;
 	let layer = 1;
@@ -29,7 +30,7 @@
 		minThickness: 0.32,
 		lithophaneMode: false
 	};
-	let layers = Math.round(lithoSettings.thickness / layerHeight);
+	let layers = 25;
 	let subd = Number(range) / Number(layers);
 
 	let colors = [
@@ -96,7 +97,7 @@
 
 	$: {
 		redrawFn(currentFile);
-		layers = Math.round(thickness / layerHeight);
+		layers = Math.round(lithoSettings.thickness / layerHeight);
 	}
 
 	function handleInput(event) {
@@ -115,7 +116,9 @@
 	}
 
 	const sketch = (p5) => {
-		let current_value = null;
+		let theShader;
+		let bufferB;
+
 		let orig_color = p5.color(base_color[0]);
 		let current_color = base_color;
 
@@ -148,35 +151,34 @@
 
 		p5.preload = () => {
 			img = p5.loadImage(currentFile);
-			copy = p5.loadImage(currentFile);
 		};
 
 		p5.setup = () => {
-			if (img && copy) {
+			if (img) {
 				img.resize(final_w, 0);
-				copy.resize(final_w, 0);
 				if (lithoSettings.lithophaneMode) {
 					img.loadPixels();
 					const backgroundColor = [img.pixels[0], img.pixels[1], img.pixels[2]];
 
 					removeImageBackground(img, backgroundColor, 30);
-					removeImageBackground(copy, backgroundColor, 30);
 
 					img.filter(p5.INVERT);
-					copy.filter(p5.INVERT);
 				}
 				img.loadPixels();
-				copy.loadPixels();
 			}
 
-			p5.createCanvas(img.width, img.height);
+			const canvas = p5.createCanvas(img.width, img.height, p5.WEBGL);
+			bufferB = p5.createGraphics(img.width, img.height, p5.WEBGL);
+
+			theShader = p5.createShader(image_processor_vert, image_processor_frag);
 
 			redrawFn = (file) => {
 				if (file) {
 					isLoading = true;
-					layer = 1;
-					p5.blend(0, 0, final_w, img.height, 0, 0, final_w, img.height, 'REPLACE');
+					layer = 0;
+					bufferB.clear();
 					resetColors();
+					// img = p5.loadImage(currentFile);
 					p5.redraw();
 					p5.loop();
 				}
@@ -184,44 +186,41 @@
 		};
 
 		p5.draw = () => {
+			p5.image(img);
+			mesh = imageToMesh(img.canvas, lithoSettings);
 			if (layer <= layers) {
-				let thresh = subd * (layer - 1);
-				for (let i = 0; i < copy.pixels.length; i += 4) {
-					if (img?.pixels[i + 3] == 0) continue;
+				let destination = bufferB;
+				destination.shader(theShader);
+				current_color = colors.find((color) => color[2] == layer) || current_color || base_color;
+				let current_color_p5 = p5.color(current_color[0]);
 
-					if (layer !== 1) {
-						orig_color = p5.color(copy?.pixels[i], copy?.pixels[i + 1], copy?.pixels[i + 2]);
-					}
-					if (use_gray) {
-						current_value = (img?.pixels[i] + img?.pixels[i + 1] + img?.pixels[i + 2]) / 3;
-					} else {
-						let c = p5.color(img?.pixels[i], img?.pixels[i + 1], img?.pixels[i + 2]);
-						current_value = p5.hue(c);
-					}
-					if (current_value >= thresh) {
-						if (lithoSettings.lithophaneMode) {
-							current_color = base_color;
-						} else {
-							current_color =
-								colors.find((color) => color[2] == layer) || current_color || base_color;
-						}
-						let result = mixbox.lerp(
-							orig_color.levels,
-							p5.color(current_color[0]).levels,
-							1 - current_color[1] / 100
-						);
-						copy.pixels[i + 0] = result[0];
-						copy.pixels[i + 1] = result[1];
-						copy.pixels[i + 2] = result[2];
-					}
-				}
-				copy?.updatePixels();
-				p5.image(copy, 0, 0);
+				theShader.setUniform('u_copy_texture', destination);
+				theShader.setUniform('u_img_texture', img);
+				theShader.setUniform(
+					'u_base_color',
+					p5
+						.color(base_color[0])
+						.levels.slice(0, 3)
+						.map((c) => c / 255)
+				);
+				theShader.setUniform(
+					'u_current_color_rgb',
+					current_color_p5.levels.slice(0, 3).map((c) => c / 255)
+				);
+				theShader.setUniform('u_current_color_amount', current_color[1]);
+				theShader.setUniform('u_threshold', subd * layer);
+				theShader.setUniform('u_use_gray', use_gray);
+				theShader.setUniform('u_range', range);
+				theShader.setUniform('u_litho_mode', lithoSettings.lithophaneMode);
+
+				destination.rect(-p5.width / 2, -p5.height, destination.width, destination.height);
+				p5.texture(destination);
 				layer++;
 			} else {
 				console.log('Took:' + (Date.now() - total) / 1000.0 + 's');
-				final = copy.canvas;
-				mesh = imageToMesh(final, lithoSettings);
+				bufferB.loadPixels();
+				p5.image(bufferB, -p5.width / 2, -p5.height / 2);
+				final = bufferB.canvas;
 				if (mesh) {
 					setUseTexture(!lithoSettings.lithophaneMode);
 					if (!lithoSettings.lithophaneMode) {
